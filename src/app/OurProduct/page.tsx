@@ -3,14 +3,13 @@ import Header from "@/components/Header/page";
 import Footer from "@/components/Footer/page";
 import TitleH2 from "@/components/TitleH2";
 import { ChangeEvent, useEffect, useState } from "react";
-import { useGetProduct, useGetProductSort } from "@/helper/getData";
 import CategoryBlock from "@/components/OurProductPage/CatagoryBlock";
 import ButtonBlock from "@/components/OurProductPage/ButtonBlock";
 import FilterBlock from "@/components/OurProductPage/FilterBlock";
 import SortBlock from "@/components/OurProductPage/SortBlock";
 import ListProductBlock from "@/components/OurProductPage/ListProductBlock";
 import ProductList from "@/components/OurProductPage/ProductListBlock";
-import { useHandlePage } from "@/helper/handleEvent";
+import { API } from "@/helper/API";
 
 interface Product {
     id: number;
@@ -52,11 +51,74 @@ function OurProduct() {
     }
 
     const handleChangeSort = (e: ChangeEvent<HTMLSelectElement>) => { 
-        useGetProductSort(getKey, setListProduct, e.target.value)
+        if (e.target.value === 'lastest') {
+            fetch(`${API}/product/?order[]=createdAt&order[]=DESC&page=${getKey}&limit=6`, {
+                method: 'GET',
+                headers: {
+                    'Accept': 'application/json, text/plain, */*',
+                },
+            }).then(res => res.json())
+                .then((res: { productData: { rows: Product[] } }) => { setListProduct(res.productData?.rows) })
+        }
+        if (e.target.value === 'oldest') {
+            fetch(`${API}/product/?order[]=createdAt&order[]=ASC&page=${getKey}&limit=6`, {
+                method: 'GET',
+                headers: {
+                    'Accept': 'application/json, text/plain, */*',
+                },
+            }).then(res => res.json())
+                .then((res: { productData: { rows: Product[] } }) => { setListProduct(res.productData?.rows) })
+        }
+        if (e.target.value === 'low-to-high') {
+            fetch(`${API}/product/?order[]=priceProduct&order[]=ASC&page=${getKey}&limit=6`, {
+                method: 'GET',
+                headers: {
+                    'Accept': 'application/json, text/plain, */*',
+                },
+            }).then(res => res.json())
+                .then((res: { productData: { rows: Product[] } }) => { setListProduct(res.productData?.rows) })
+        }
+        if (e.target.value === 'high-to-low') {
+            fetch(`${API}/product/?order[]=priceProduct&order[]=DESC&page=${getKey}&limit=6`, {
+                method: 'GET',
+                headers: {
+                    'Accept': 'application/json, text/plain, */*',
+                },
+            }).then(res => res.json())
+                .then((res: { productData: { rows: Product[] } }) => { setListProduct(res.productData?.rows) })
+        }
     }
 
-    useGetProduct(setListProduct, setTotalProduct)
-    useHandlePage(totalPage, setPageItem, setGetKey, setListProduct)
+    useEffect(() => {
+        fetch(`${API}/product/?page=1&limit=6&order[]=createdAt&order[]=DESC`, {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json, text/plain, */*',
+                'Content-Type': 'application/json'
+            },
+        }).then(res => res.json())
+            .then((res: { productData: { rows: Product[], count: number } }) => { setListProduct(res.productData.rows), setTotalProduct(res.productData.count) });
+    }, [])
+    
+    useEffect(() => {
+        const pageItems = []
+        for (let i = 1; i <= totalPage; i++) {
+            pageItems.push(<p key={i} onClick={handlePage} className="bg-white rounded-full py-1 px-3 text-lg hover:bg-black hover:text-white transition duration-300 cursor-pointer relative hover:bottom-1">{i}</p>)
+        }
+        setPageItem(pageItems)
+    }, [totalPage])
+
+    const handlePage = (e: any) => {
+        const key = e.target.textContent;
+        setGetKey(e.target.textContent)
+        fetch(`${API}/product/?order[]=createdAt&order[]=DESC&limit=6&page=${key}`, {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json, text/plain, */*',
+            }
+        }).then(res => res.json())
+            .then((res: { productData: { rows: Product[] } }) => { setListProduct(res.productData?.rows) });
+    }
 
     return (
         <div className="bg-background-200">
