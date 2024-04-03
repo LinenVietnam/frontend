@@ -1,8 +1,6 @@
 'use client'
 import React, { useEffect, useState } from "react"
-import ChoosePayment from "../PaymentForm.tsx/ChoosePayment"
 import { API } from "@/helper/API"
-import PaypalCheckoutButton from "./PaypalCheckoutButton";
 
 interface Payment {
     formDataSend: any
@@ -40,7 +38,7 @@ function Payment(props: Payment) {
         sumPrice += item.totalPrice;
     }
 
-    let fSumPrice = sumPrice / 24500
+
     const product = {
         description: String(producNametList),
         // price: fSumPrice.toFixed(2)
@@ -93,9 +91,6 @@ function Payment(props: Payment) {
                 <ChoosePayment />
                 <div className="w-full bg-gold-200 hover:bg-gold-400 transition duration-300 cursor-pointer text-white text-xl py-5 flex justify-center mt-5" onClick={handleSubmit}>Place order</div>
             </div> */}
-            {fSumPrice ? <div className="paypal-button-container">
-                <PaypalCheckoutButton product={product} />
-            </div> : <p>Bạn chưa có sản phẩm trong giỏ hàng</p>}
         </>
     )
 }
